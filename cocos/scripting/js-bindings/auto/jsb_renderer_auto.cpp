@@ -1291,6 +1291,25 @@ static bool js_renderer_NodeProxy_setAssembler(se::State& s)
 }
 SE_BIND_FUNC(js_renderer_NodeProxy_setAssembler)
 
+static bool js_renderer_NodeProxy_enableBfsRender(se::State& s)
+{
+    cocos2d::renderer::NodeProxy* cobj = (cocos2d::renderer::NodeProxy*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_renderer_NodeProxy_enableBfsRender : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        bool arg0;
+        ok &= seval_to_boolean(args[0], &arg0);
+        SE_PRECONDITION2(ok, false, "js_renderer_NodeProxy_enableBfsRender : Error processing arguments");
+        cobj->enableBfsRender(arg0);
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_renderer_NodeProxy_enableBfsRender)
+
 SE_DECLARE_FINALIZE_FUNC(js_cocos2d_renderer_NodeProxy_finalize)
 
 static bool js_renderer_NodeProxy_constructor(se::State& s)
@@ -1339,6 +1358,7 @@ bool js_register_renderer_NodeProxy(se::Object* obj)
     cls->defineFunction("clearAssembler", _SE(js_renderer_NodeProxy_clearAssembler));
     cls->defineFunction("switchTraverseToVisit", _SE(js_renderer_NodeProxy_switchTraverseToVisit));
     cls->defineFunction("setAssembler", _SE(js_renderer_NodeProxy_setAssembler));
+    cls->defineFunction("enableBfsRender", _SE(js_renderer_NodeProxy_enableBfsRender));
     cls->defineFinalizeFunction(_SE(js_cocos2d_renderer_NodeProxy_finalize));
     cls->install();
     JSBClassType::registerClass<cocos2d::renderer::NodeProxy>(cls);

@@ -85,6 +85,7 @@ SE_DECLARE_FUNC(js_renderer_NodeProxy_setName);
 SE_DECLARE_FUNC(js_renderer_NodeProxy_clearAssembler);
 SE_DECLARE_FUNC(js_renderer_NodeProxy_switchTraverseToVisit);
 SE_DECLARE_FUNC(js_renderer_NodeProxy_setAssembler);
+SE_DECLARE_FUNC(js_renderer_NodeProxy_enableBfsRender);
 SE_DECLARE_FUNC(js_renderer_NodeProxy_NodeProxy);
 
 extern se::Object* __jsb_cocos2d_renderer_BaseRenderer_proto;

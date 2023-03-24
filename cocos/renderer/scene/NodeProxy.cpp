@@ -150,6 +150,9 @@ void NodeProxy::addChild(NodeProxy* child)
     }
     _children.pushBack(child);
     child->setParent(this);
+
+    // for drawcall【from wulifun】
+    _customDirty = true;
 }
 
 void NodeProxy::detachChild(NodeProxy *child, ssize_t childIndex)
@@ -157,6 +160,9 @@ void NodeProxy::detachChild(NodeProxy *child, ssize_t childIndex)
     // set parent nil at the end
     child->setParent(nullptr);
     _children.erase(childIndex);
+
+    // for drawcall【from wulifun】
+    _customDirty = true;
 }
 
 void NodeProxy::removeChild(NodeProxy* child)
@@ -182,6 +188,9 @@ void NodeProxy::removeAllChildren()
     }
     
     _children.clear();
+
+    // for drawcall【from wulifun】
+    _customDirty = true;
 }
 
 NodeProxy* NodeProxy::getChildByName(std::string childName)
@@ -299,6 +308,40 @@ void NodeProxy::reorderChildren()
         });
 #endif
         *_dirty &= ~RenderFlow::REORDER_CHILDREN;
+    }
+}
+
+// for drawcall【from wulifun】
+void NodeProxy::setCustomZOrder(NodeProxy* node, int &zOrder, cocos2d::Vector<NodeProxy*> &batchChildren)
+{
+    node->_customZOrder = zOrder;
+    batchChildren.pushBack(node);
+    for (const auto& child : node->_children)
+    {
+        child->setCustomZOrder(child, ++zOrder, batchChildren);
+    }
+}
+
+// for drawcall【from wulifun】
+void NodeProxy::reorderChildren_bfs(cocos2d::Vector<NodeProxy*> &batchChildren)
+{
+    if (_customDirty) {
+        batchChildren.clear();
+        for (const auto& child : _children)
+        {
+            int order = 1;
+            child->setCustomZOrder(child, order, batchChildren);
+        }
+#if CC_64BITS
+        std::sort(std::begin(batchChildren), std::end(batchChildren), [](NodeProxy *n1, NodeProxy *n2) {
+            return (n1->_customZOrder < n2->_customZOrder);
+        });
+#else
+        std::stable_sort(std::begin(batchChildren), std::end(batchChildren),[](NodeProxy *n1, NodeProxy *n2) {
+            return n1->_customZOrder < n2->_customZOrder;
+        });
+#endif
+        _customDirty = false;
     }
 }
 
@@ -535,11 +578,23 @@ void NodeProxy::render(NodeProxy* node, ModelBatcher* batcher, Scene* scene)
     // pre render
     if (node->_assembler && needRender) node->_assembler->handle(node, batcher, scene);
 
-    node->reorderChildren();
-    for (const auto& child : node->_children)
+    // for drawcall【from wulifun】
+    if (node->_customRenderFlow)
     {
-        auto traverseHandle = child->traverseHandle;
-        traverseHandle(child, batcher, scene);
+        node->reorderChildren_bfs(node->_batchChildren);
+        for (const auto& child : node->_batchChildren)
+        {
+            auto traverseHandle = child->traverseHandle;
+            traverseHandle(child, batcher, scene);
+        }
+    } else if (node->_customZOrder == 0)
+    {
+        node->reorderChildren();
+        for (const auto& child : node->_children)
+        {
+            auto traverseHandle = child->traverseHandle;
+            traverseHandle(child, batcher, scene);
+        }
     }
 
     // post render

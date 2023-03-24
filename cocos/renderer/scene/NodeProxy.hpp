@@ -324,11 +324,20 @@ public:
      *  @brief traverse handle
      */
     TraverseFunc traverseHandle = nullptr;
+
+    /*
+     * for drawcall【from wulifun】
+     */
+    void enableBfsRender(bool value) { _customRenderFlow = value; }
 protected:
     void updateLevel();
     void childrenAlloc();
     void detachChild(NodeProxy* child, ssize_t childIndex);
     void reorderChildren();
+
+    // for drawcall【from wulifun】
+    void reorderChildren_bfs(cocos2d::Vector<NodeProxy *> &batchChildren);
+    void setCustomZOrder(NodeProxy* node, int &zOrder, cocos2d::Vector<NodeProxy *> &batchChildren);
 private:
     bool _needVisit = true;
     bool _updateWorldMatrix = true;
@@ -361,6 +370,12 @@ private:
     
     uint32_t _renderOrder = 0;
     static uint32_t _globalRenderOrder;
+
+    // for drawcall【from wulifun】
+    int8_t _customZOrder = 0;
+    bool _customRenderFlow = false;
+    bool _customDirty = false;
+    cocos2d::Vector<NodeProxy *> _batchChildren;
 };
 
 // end of scene group
