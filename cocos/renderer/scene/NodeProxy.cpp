@@ -595,7 +595,7 @@ void NodeProxy::render(NodeProxy* node, ModelBatcher* batcher, Scene* scene)
     if (node->_assembler && needRender) node->_assembler->handle(node, batcher, scene);
 
     // for drawcall【from wulifun】
-    if (node->_customRenderFlow)
+    if (node->_openBatchRender)
     {
         node->reorderChildren_bfs(node->_batchChildren);
         for (const auto& child : node->_batchChildren)
