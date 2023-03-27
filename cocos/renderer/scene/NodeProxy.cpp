@@ -152,7 +152,7 @@ void NodeProxy::addChild(NodeProxy* child)
     child->setParent(this);
 
     // for drawcall【from wulifun】
-    _customDirty = true;
+    setCustomDirty(true);
 }
 
 void NodeProxy::detachChild(NodeProxy *child, ssize_t childIndex)
@@ -162,7 +162,7 @@ void NodeProxy::detachChild(NodeProxy *child, ssize_t childIndex)
     _children.erase(childIndex);
 
     // for drawcall【from wulifun】
-    _customDirty = true;
+    setCustomDirty(true);
 }
 
 void NodeProxy::removeChild(NodeProxy* child)
@@ -190,7 +190,7 @@ void NodeProxy::removeAllChildren()
     _children.clear();
 
     // for drawcall【from wulifun】
-    _customDirty = true;
+    setCustomDirty(true);
 }
 
 NodeProxy* NodeProxy::getChildByName(std::string childName)
@@ -308,6 +308,22 @@ void NodeProxy::reorderChildren()
         });
 #endif
         *_dirty &= ~RenderFlow::REORDER_CHILDREN;
+    }
+}
+
+// for drawcall【from wulifun】
+void NodeProxy::setCustomDirty(bool value)
+{
+    if (_openBatchRender)
+    {
+        _customDirty = value;
+    }
+    else if (_customZOrder > 0)
+    {
+        if (_parent)
+        {
+            _parent->setCustomDirty(value);
+        }
     }
 }
 

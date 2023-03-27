@@ -328,7 +328,7 @@ public:
     /*
      * for drawcall【from wulifun】
      */
-    void enableBfsRender(bool value) { _customRenderFlow = value; }
+    void enableBfsRender(bool value) { _openBatchRender = value; _customDirty = value; }
 protected:
     void updateLevel();
     void childrenAlloc();
@@ -338,6 +338,7 @@ protected:
     // for drawcall【from wulifun】
     void reorderChildren_bfs(cocos2d::Vector<NodeProxy *> &batchChildren);
     void setCustomZOrder(NodeProxy* node, int &zOrder, cocos2d::Vector<NodeProxy *> &batchChildren);
+    void setCustomDirty(bool value);
 private:
     bool _needVisit = true;
     bool _updateWorldMatrix = true;
@@ -373,7 +374,7 @@ private:
 
     // for drawcall【from wulifun】
     int8_t _customZOrder = 0;
-    bool _customRenderFlow = false;
+    bool _openBatchRender = false;
     bool _customDirty = false;
     cocos2d::Vector<NodeProxy *> _batchChildren;
 };
